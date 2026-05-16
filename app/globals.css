@@ -1,0 +1,695 @@
+:root {
+  --background: #f4f1ec;
+  --surface: #ffffff;
+  --ink: #161616;
+  --muted: #68625d;
+  --line: #d8d2ca;
+  --accent: #165d59;
+  --accent-strong: #0f4542;
+  --danger: #a33a31;
+  --danger-strong: #7e2b24;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--background);
+  color: var(--ink);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+/* ── Layout ── */
+
+.app-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-header p {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.page-header h1 {
+  margin: 0;
+  font-size: 32px;
+  line-height: 1.1;
+}
+
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.nav-link {
+  display: inline-block;
+  padding: 6px 14px;
+  font-size: 14px;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.nav-link:hover {
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.nav-active {
+  color: var(--accent);
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Form workspace ── */
+
+.workspace {
+  display: grid;
+  grid-template-columns: minmax(440px, 1fr) minmax(340px, 420px);
+  gap: 24px;
+  align-items: start;
+}
+
+.form-panel,
+.preview-panel {
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.form-panel {
+  padding: 24px;
+}
+
+.form-section + .form-section {
+  margin-top: 24px;
+}
+
+.form-section h2 {
+  margin: 0 0 16px;
+  font-size: 18px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field.wide {
+  grid-column: 1 / -1;
+}
+
+.field span {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.field-hint,
+.field-error {
+  font-size: 12px;
+}
+
+.field-hint {
+  color: var(--muted);
+}
+
+.field-error {
+  color: var(--danger);
+}
+
+.field input,
+.field select {
+  min-height: 42px;
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 0 12px;
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 22px 0 18px;
+}
+
+.checkbox-row input {
+  width: 18px;
+  height: 18px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+/* ── Buttons ── */
+
+.primary-button,
+.secondary-button,
+.danger-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  border: 1px solid transparent;
+  padding: 0 16px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.primary-button {
+  background: var(--accent);
+  color: #fff;
+}
+
+.primary-button:hover {
+  background: var(--accent-strong);
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.secondary-button {
+  border-color: var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+
+.secondary-button:hover {
+  background: var(--background);
+}
+
+.danger-button {
+  border-color: var(--danger);
+  background: #fff;
+  color: var(--danger);
+}
+
+.danger-button:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+/* ── Form preview panel (simple cards) ── */
+
+.preview-panel {
+  padding: 24px;
+}
+
+.sheet-preview {
+  position: relative;
+  min-height: 400px;
+  background: #fff;
+}
+
+.label-card {
+  width: 100%;
+  border: 1px solid #111;
+  padding: 20px 24px 16px;
+  display: grid;
+  gap: 5px;
+  font-size: 13px;
+}
+
+.label-card h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
+.recipient-card {
+  font-size: 16px;
+}
+
+.sender-card {
+  margin-top: 12px;
+  font-size: 11px;
+}
+
+.recipient-card h3 {
+  font-size: 14px;
+}
+
+.sender-card h3 {
+  font-size: 10px;
+}
+
+.registro-stamp {
+  width: 200px;
+  color: #111;
+  text-align: center;
+  padding: 16px;
+  border: 1px solid #111;
+  margin-top: 16px;
+}
+
+.registro-stamp > div {
+  border-bottom: 3px solid #111;
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+.registro-stamp small,
+.registro-stamp strong {
+  display: block;
+  margin-top: 4px;
+}
+
+.registro-stamp small {
+  font-size: 10px;
+}
+
+.registro-stamp strong {
+  font-size: 14px;
+}
+
+/* ── Print step layout ── */
+
+.print-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.print-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.print-page-container {
+  display: flex;
+  justify-content: center;
+}
+
+/* ── Printable label (Correios style — landscape, label on right) ── */
+
+.print-page {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  background: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #000;
+}
+
+.print-blank-half {
+  flex: 0 0 59%;
+}
+
+.print-label-half {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.exclusive-section {
+  position: relative;
+  flex: 1;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 20px 0 20px;
+}
+
+.exclusive-body {
+  text-align: center;
+}
+
+.exclusive-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.exclusive-subtitle {
+  margin: 0;
+  font-size: 11px;
+  color: #555;
+}
+
+.label-section-wrap {
+  position: relative;
+  padding: 8px 20px 20px;
+}
+
+/* Corner marks */
+.corner-mark {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+}
+
+.corner-tl {
+  top: 0;
+  left: 0;
+  border-top: 2px solid #000;
+  border-left: 2px solid #000;
+}
+
+.corner-tr {
+  top: 0;
+  right: 0;
+  border-top: 2px solid #000;
+  border-right: 2px solid #000;
+}
+
+.corner-bl {
+  bottom: 0;
+  left: 0;
+  border-bottom: 2px solid #000;
+  border-left: 2px solid #000;
+}
+
+.corner-br {
+  bottom: 0;
+  right: 0;
+  border-bottom: 2px solid #000;
+  border-right: 2px solid #000;
+}
+
+.receiver-lines {
+  margin-bottom: 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.receiver-line {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.line-fill {
+  flex: 1;
+  border-bottom: 1px solid #000;
+  display: inline-block;
+  height: 14px;
+}
+
+.main-label {
+  display: flex;
+  border: 1.5px solid #000;
+  min-height: 220px;
+}
+
+.label-body {
+  flex: 1;
+  border-right: 1.5px solid #000;
+  display: flex;
+  flex-direction: column;
+}
+
+.destinatario-header {
+  background: #000;
+  color: #fff;
+  font-weight: bold;
+  font-size: 12px;
+  padding: 5px 12px;
+  letter-spacing: 0.5px;
+}
+
+.recipient-details {
+  padding: 10px 12px 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.recipient-name {
+  font-weight: bold;
+  font-size: 13px;
+}
+
+.cep-city-line {
+  padding: 8px 12px 4px;
+  font-size: 20px;
+  font-weight: bold;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.cep-large {
+  font-size: 20px;
+}
+
+.city-large {
+  font-size: 16px;
+}
+
+.barcode-wrap {
+  padding: 4px 12px 10px;
+}
+
+.barcode-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.label-side {
+  width: 155px;
+  flex-shrink: 0;
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.qr-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+.stamp-wrap .registro-stamp {
+  width: 140px;
+  padding: 10px 8px;
+  font-size: 11px;
+}
+
+.stamp-wrap .registro-stamp > div {
+  font-size: 23px;
+}
+
+.stamp-wrap .registro-stamp small {
+  font-size: 8px;
+}
+
+.stamp-wrap .registro-stamp strong {
+  font-size: 11px;
+}
+
+.sender-info {
+  margin-top: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.sender-info p {
+  margin: 0;
+}
+
+.sender-info strong {
+  margin-right: 4px;
+}
+
+/* ── Authorization page ── */
+
+.auth-shell {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 32px 24px 48px;
+}
+
+.auth-workspace {
+  display: grid;
+  grid-template-columns: minmax(440px, 1fr) minmax(340px, 420px);
+  gap: 24px;
+  align-items: start;
+}
+
+.auth-print-page {
+  position: relative;
+  padding: 56px 52px 48px;
+  min-height: 600px;
+  font-family: Arial, Helvetica, sans-serif;
+  width: 100%;
+  max-width: 480px;
+  print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
+}
+
+.auth-title {
+  text-align: center;
+  font-size: 26px;
+  font-weight: bold;
+  text-decoration: underline;
+  margin: 0 0 48px;
+  letter-spacing: 1px;
+}
+
+.auth-body {
+  font-size: 14px;
+  line-height: 1.9;
+  text-align: justify;
+  margin: 0 0 56px;
+}
+
+.auth-date {
+  text-align: center;
+  font-size: 13px;
+  margin: 0 0 56px;
+}
+
+.auth-signature-line {
+  border-top: 1px solid #000;
+  width: 70%;
+  margin: 0 0 20px;
+}
+
+.auth-owner {
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.8;
+}
+
+.auth-owner p {
+  margin: 0;
+}
+
+/* ── Print media ── */
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .app-shell,
+  .auth-shell {
+    padding: 0;
+    max-width: none;
+  }
+
+  .print-page-container {
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  .print-page {
+    max-width: none;
+    width: 297mm;
+    height: 210mm;
+    border: none;
+  }
+
+  .print-blank-half {
+    flex: 0 0 40%;
+  }
+
+  .print-label-half {
+    flex: 1;
+  }
+
+  .auth-print-page {
+    max-width: none;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  @page {
+    size: A4 landscape;
+    margin: 0;
+  }
+}
+
+/* ── Responsive ── */
+
+@media (max-width: 900px) {
+  .workspace,
+  .auth-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-panel {
+    order: -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-shell,
+  .auth-shell {
+    padding: 20px 16px 32px;
+  }
+
+  .page-header h1 {
+    font-size: 26px;
+  }
+
+  .header-inner {
+    flex-direction: column;
+  }
+
+  .field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .print-toolbar {
+    flex-direction: column;
+  }
+}
