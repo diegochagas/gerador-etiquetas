@@ -110,37 +110,57 @@ function FormField({
 }
 
 function PrintableAuth({ data }: { data: AuthData }) {
+  const [showSignature, setShowSignature] = useState(true);
+
   return (
-    <div
-      className="print-label-half"
-      style={{ padding: "56px 52px 48px", minHeight: "566px" }}
-    >
-      <h1 className="auth-title">AUTORIZAÇÃO</h1>
+    <div className="print-page">
+      <div className="print-blank-half" />
+      <div className="print-label-half" style={{ padding: "56px 52px 48px" }}>
+        <h1 className="auth-title">AUTORIZAÇÃO</h1>
 
-      <p className="auth-body">
-        Autorizo <strong>{data.authorized.name.toUpperCase()}</strong>, RG nº{" "}
-        <strong>{data.authorized.rg}</strong>, CPF nº{" "}
-        <strong>{data.authorized.cpf}</strong>, retirar o objeto nº{" "}
-        <strong>{data.objectNumber}</strong> postado por{" "}
-        <strong>{data.senderName}</strong> e a mim destinado.
-      </p>
-
-      <p className="auth-date">
-        {data.city}, {formatDateBR(data.date)} .
-      </p>
-
-      <div className="auth-signature-line" />
-
-      <div className="auth-owner">
-        <p>
-          <strong>Nome:</strong> {data.owner.name.toUpperCase()}
+        <p className="auth-body">
+          Autorizo <strong>{data.authorized.name.toUpperCase()}</strong>, RG nº{" "}
+          <strong>{data.authorized.rg}</strong>, CPF nº{" "}
+          <strong>{data.authorized.cpf}</strong>, retirar o objeto nº{" "}
+          <strong>{data.objectNumber}</strong> postado por{" "}
+          <strong>{data.senderName}</strong> e a mim destinado.
         </p>
-        <p>
-          <strong>RG:</strong> {data.owner.rg}
+
+        <p className="auth-date">
+          {data.city}, {formatDateBR(data.date)} .
         </p>
-        <p>
-          <strong>CPF:</strong> {data.owner.cpf}
-        </p>
+
+        <div style={{ position: "relative", paddingTop: 72, marginBottom: 20 }}>
+          {showSignature && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src="/assinatura.png"
+              alt=""
+              onError={() => setShowSignature(false)}
+              style={{
+                position: "absolute",
+                bottom: -20,
+                left: 60,
+                height: 50,
+                width: "auto",
+                objectFit: "contain",
+              }}
+            />
+          )}
+          <div className="auth-signature-line" style={{ margin: 0 }} />
+        </div>
+
+        <div className="auth-owner">
+          <p>
+            <strong>Nome:</strong> {data.owner.name.toUpperCase()}
+          </p>
+          <p>
+            <strong>RG:</strong> {data.owner.rg}
+          </p>
+          <p>
+            <strong>CPF:</strong> {data.owner.cpf}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -151,47 +171,44 @@ async function downloadPdf(selector: string, filename: string) {
   if (!element) return;
   const html2canvas = (await import("html2canvas")).default;
   const { jsPDF } = await import("jspdf");
-
-  // Same layout as Etiqueta PDF: A4 landscape, 40% blank left, 60% content right
-  const BLANK_FRACTION = 0.4;
-  const CONTENT_FRACTION = 0.6;
-  // A4 landscape: 297mm wide × 210mm tall
-  // Content area: 297*0.6 = 178.2mm wide, 210mm tall → ratio height/width = 210/178.2
-  const elemWidth = element.offsetWidth;
-  const contentAreaRatio = 210 / (297 * CONTENT_FRACTION);
-  const targetHeight = Math.round(elemWidth * contentAreaRatio);
-  const prevMinHeight = element.style.minHeight;
-  element.style.minHeight = `${targetHeight}px`;
-
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
     logging: false,
     backgroundColor: "#ffffff",
   });
-
-  element.style.minHeight = prevMinHeight;
-
   const imgData = canvas.toDataURL("image/png");
   const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
-  const pageWidth = pdf.internal.pageSize.getWidth(); // 297mm
-  const pageHeight = pdf.internal.pageSize.getHeight(); // 210mm
-  const contentX = pageWidth * BLANK_FRACTION; // 118.8mm from left
-  const contentW = pageWidth * CONTENT_FRACTION; // 178.2mm wide
-  pdf.addImage(imgData, "PNG", contentX, 0, contentW, pageHeight);
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const canvasRatio = canvas.height / canvas.width;
+  let imgW = pageWidth;
+  let imgH = pageWidth * canvasRatio;
+  if (imgH > pageHeight) {
+    imgH = pageHeight;
+    imgW = pageHeight / canvasRatio;
+  }
+  pdf.addImage(imgData, "PNG", 0, 0, imgW, imgH);
   pdf.save(filename);
 }
 
 export default function AutorizacaoPage() {
-  const [data, setData] = useState<AuthData>(loadFromStorage);
+  const [data, setData] = useState<AuthData>(initialAuth);
+  const [hydrated, setHydrated] = useState(false);
   const [step, setStep] = useState<"form" | "print">("form");
   const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
+    setData(loadFromStorage());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch {}
-  }, [data]);
+  }, [data, hydrated]);
 
   const handleClear = () => {
     try {
@@ -218,7 +235,7 @@ export default function AutorizacaoPage() {
   const handleDownloadPdf = async () => {
     setPdfLoading(true);
     try {
-      await downloadPdf(".print-label-half", "autorizacao.pdf");
+      await downloadPdf(".print-page", "autorizacao.pdf");
     } finally {
       setPdfLoading(false);
     }
@@ -389,9 +406,30 @@ export default function AutorizacaoPage() {
             </div>
           </div>
 
-          {/* Live preview */}
-          <aside className="preview-panel" style={{ padding: 0 }}>
-            <PrintableAuth data={data} />
+          <aside className="preview-panel">
+            <div className="sheet-preview">
+              <div className="label-card recipient-card">
+                <h3>PESSOA AUTORIZADA</h3>
+                <strong>{data.authorized.name}</strong>
+                {data.authorized.rg && <span>RG: {data.authorized.rg}</span>}
+                {data.authorized.cpf && <span>CPF: {data.authorized.cpf}</span>}
+                {data.objectNumber && <span>Objeto: {data.objectNumber}</span>}
+                {data.senderName && <span>Remetente: {data.senderName}</span>}
+              </div>
+              <div className="label-card sender-card">
+                <h3>DESTINATÁRIO (QUEM AUTORIZA)</h3>
+                <strong>{data.owner.name}</strong>
+                {data.owner.rg && <span>RG: {data.owner.rg}</span>}
+                {data.owner.cpf && <span>CPF: {data.owner.cpf}</span>}
+                {(data.city || data.date) && (
+                  <span>
+                    {data.city}
+                    {data.city && data.date ? ", " : ""}
+                    {formatDateBR(data.date)}
+                  </span>
+                )}
+              </div>
+            </div>
           </aside>
         </form>
       ) : (
@@ -418,10 +456,7 @@ export default function AutorizacaoPage() {
             </button>
           </div>
           <div className="print-page-container">
-            <div className="print-page">
-              <div className="print-blank-half" />
-              <PrintableAuth data={data} />
-            </div>
+            <PrintableAuth data={data} />
           </div>
         </div>
       )}

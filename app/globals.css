@@ -582,9 +582,9 @@ select {
 }
 
 .auth-date {
-  text-align: center;
+  text-align: right;
   font-size: 13px;
-  margin: 0 0 56px;
+  margin: 0;
 }
 
 .auth-signature-line {
@@ -606,22 +606,20 @@ select {
 /* ── Print media ── */
 
 @media print {
-  .no-print {
-    display: none !important;
+  body * {
+    visibility: hidden;
   }
 
-  body {
-    background: white;
-  }
-
-  .app-shell,
-  .auth-shell {
-    padding: 0;
-    max-width: none;
+  .print-page-container,
+  .print-page-container * {
+    visibility: visible;
   }
 
   .print-page-container {
+    position: fixed;
+    inset: 0;
     padding: 0;
+    display: flex;
     justify-content: flex-start;
   }
 
@@ -638,12 +636,6 @@ select {
 
   .print-label-half {
     flex: 1;
-  }
-
-  .auth-print-page {
-    max-width: none;
-    width: 100%;
-    min-height: 100vh;
   }
 
   @page {

@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "c:\\Users\\droch\\Projects\\gerador-etiquetas\\app\\api\\cep"
+    ],
+    "allow": [
+      "Read(//c/Users/droch/Projects/gerador-etiquetas/app/api/cep/**)"
+    ]
+  }
+}

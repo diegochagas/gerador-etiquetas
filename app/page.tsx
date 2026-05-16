@@ -365,7 +365,8 @@ async function downloadPdf(selector: string, filename: string) {
 }
 
 export default function Home() {
-  const [data, setData] = useState<LabelData>(loadFromStorage);
+  const [data, setData] = useState<LabelData>(initialData);
+  const [hydrated, setHydrated] = useState(false);
   const [step, setStep] = useState<"form" | "print">("form");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [cepStatus, setCepStatus] = useState({
@@ -378,10 +379,16 @@ export default function Home() {
     hasRequiredAddressFields(data.sender);
 
   useEffect(() => {
+    setData(loadFromStorage());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch {}
-  }, [data]);
+  }, [data, hydrated]);
 
   const updateAddress =
     (section: "recipient" | "sender") =>
@@ -443,12 +450,9 @@ export default function Home() {
           [section]: { isLoading: true, error: "" },
         }));
         try {
-          const response = await fetch(
-            `https://viacep.com.br/ws/${cep}/json/`,
-            {
-              signal: controller.signal,
-            },
-          );
+          const response = await fetch(`/api/cep/${cep}`, {
+            signal: controller.signal,
+          });
           const payload = await response.json();
           if (!response.ok)
             throw new Error("Não foi possível consultar o CEP.");
