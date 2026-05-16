@@ -338,6 +338,32 @@ function PrintableLabel({ data }: { data: LabelData }) {
   );
 }
 
+async function printPage(selector: string) {
+  const win = window.open("", "_blank");
+  if (!win) return;
+  const element = document.querySelector(selector) as HTMLElement | null;
+  if (!element) { win.close(); return; }
+  const html2canvas = (await import("html2canvas")).default;
+  const canvas = await html2canvas(element, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    backgroundColor: "#ffffff",
+  });
+  const imgData = canvas.toDataURL("image/png");
+  win.document.write(
+    `<!DOCTYPE html><html><head><style>` +
+    `@page{size:A4 landscape;margin:0}` +
+    `*{margin:0;padding:0}` +
+    `img{width:100%;height:auto;display:block}` +
+    `</style></head><body>` +
+    `<img src="${imgData}">` +
+    `<script>window.onload=function(){window.print();window.close()}<\/script>` +
+    `</body></html>`,
+  );
+  win.document.close();
+}
+
 async function downloadPdf(selector: string, filename: string) {
   const element = document.querySelector(selector) as HTMLElement | null;
   if (!element) return;
@@ -369,6 +395,7 @@ export default function Home() {
   const [hydrated, setHydrated] = useState(false);
   const [step, setStep] = useState<"form" | "print">("form");
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
   const [cepStatus, setCepStatus] = useState({
     recipient: { isLoading: false, error: "" },
     sender: { isLoading: false, error: "" },
@@ -398,6 +425,15 @@ export default function Home() {
         [section]: { ...current[section], [field]: value },
       }));
     };
+
+  const handlePrint = async () => {
+    setPrintLoading(true);
+    try {
+      await printPage(".print-page");
+    } finally {
+      setPrintLoading(false);
+    }
+  };
 
   const handleDownloadPdf = async () => {
     setPdfLoading(true);
@@ -611,9 +647,13 @@ export default function Home() {
               <FileDown size={18} />
               {pdfLoading ? "Gerando..." : "Baixar PDF"}
             </button>
-            <button className="primary-button" onClick={() => window.print()}>
+            <button
+              className="primary-button"
+              onClick={handlePrint}
+              disabled={printLoading}
+            >
               <Printer size={18} />
-              Imprimir
+              {printLoading ? "Preparando..." : "Imprimir"}
             </button>
           </div>
           <div className="print-page-container">
