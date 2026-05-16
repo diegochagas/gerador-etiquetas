@@ -559,12 +559,10 @@ select {
 .auth-print-page {
   position: relative;
   padding: 56px 52px 48px;
-  min-height: 600px;
+  min-height: 566px;
   font-family: Arial, Helvetica, sans-serif;
   width: 100%;
   max-width: 480px;
-  print-color-adjust: exact;
-  -webkit-print-color-adjust: exact;
 }
 
 .auth-title {

@@ -5,8 +5,18 @@ import { ArrowLeft, FileDown, Printer, Trash2 } from "lucide-react";
 import Link from "next/link";
 
 const MONTHS = [
-  "Janeiro","Fevereiro","Março","Abril","Maio","Junho",
-  "Julho","Agosto","Setembro","Outubro","Novembro","Dezembro",
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
 ];
 
 function formatDateBR(dateStr: string): string {
@@ -70,15 +80,15 @@ function loadFromStorage(): AuthData {
 function isValid(data: AuthData): boolean {
   return Boolean(
     data.authorized.name &&
-      data.authorized.rg &&
-      data.authorized.cpf &&
-      data.objectNumber &&
-      data.senderName &&
-      data.city &&
-      data.date &&
-      data.owner.name &&
-      data.owner.rg &&
-      data.owner.cpf,
+    data.authorized.rg &&
+    data.authorized.cpf &&
+    data.objectNumber &&
+    data.senderName &&
+    data.city &&
+    data.date &&
+    data.owner.name &&
+    data.owner.rg &&
+    data.owner.cpf,
   );
 }
 
@@ -101,15 +111,14 @@ function FormField({
 
 function PrintableAuth({ data }: { data: AuthData }) {
   return (
-    <div className="auth-print-page">
-      <div className="corner-mark corner-tl" />
-      <div className="corner-mark corner-tr" />
-
+    <div
+      className="print-label-half"
+      style={{ padding: "56px 52px 48px", minHeight: "566px" }}
+    >
       <h1 className="auth-title">AUTORIZAÇÃO</h1>
 
       <p className="auth-body">
-        Autorizo{" "}
-        <strong>{data.authorized.name.toUpperCase()}</strong>, RG nº{" "}
+        Autorizo <strong>{data.authorized.name.toUpperCase()}</strong>, RG nº{" "}
         <strong>{data.authorized.rg}</strong>, CPF nº{" "}
         <strong>{data.authorized.cpf}</strong>, retirar o objeto nº{" "}
         <strong>{data.objectNumber}</strong> postado por{" "}
@@ -133,9 +142,6 @@ function PrintableAuth({ data }: { data: AuthData }) {
           <strong>CPF:</strong> {data.owner.cpf}
         </p>
       </div>
-
-      <div className="corner-mark corner-bl" />
-      <div className="corner-mark corner-br" />
     </div>
   );
 }
@@ -145,24 +151,34 @@ async function downloadPdf(selector: string, filename: string) {
   if (!element) return;
   const html2canvas = (await import("html2canvas")).default;
   const { jsPDF } = await import("jspdf");
+
+  // Same layout as Etiqueta PDF: A4 landscape, 40% blank left, 60% content right
+  const BLANK_FRACTION = 0.4;
+  const CONTENT_FRACTION = 0.6;
+  // A4 landscape: 297mm wide × 210mm tall
+  // Content area: 297*0.6 = 178.2mm wide, 210mm tall → ratio height/width = 210/178.2
+  const elemWidth = element.offsetWidth;
+  const contentAreaRatio = 210 / (297 * CONTENT_FRACTION);
+  const targetHeight = Math.round(elemWidth * contentAreaRatio);
+  const prevMinHeight = element.style.minHeight;
+  element.style.minHeight = `${targetHeight}px`;
+
   const canvas = await html2canvas(element, {
     scale: 2,
     useCORS: true,
     logging: false,
-    backgroundColor: "#2b2b2b",
+    backgroundColor: "#ffffff",
   });
+
+  element.style.minHeight = prevMinHeight;
+
   const imgData = canvas.toDataURL("image/png");
-  const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
-  const pageWidth = pdf.internal.pageSize.getWidth();
-  const pageHeight = pdf.internal.pageSize.getHeight();
-  const canvasRatio = canvas.height / canvas.width;
-  let imgW = pageWidth;
-  let imgH = pageWidth * canvasRatio;
-  if (imgH > pageHeight) {
-    imgH = pageHeight;
-    imgW = pageHeight / canvasRatio;
-  }
-  pdf.addImage(imgData, "PNG", 0, 0, imgW, imgH);
+  const pdf = new jsPDF({ orientation: "landscape", unit: "mm", format: "a4" });
+  const pageWidth = pdf.internal.pageSize.getWidth(); // 297mm
+  const pageHeight = pdf.internal.pageSize.getHeight(); // 210mm
+  const contentX = pageWidth * BLANK_FRACTION; // 118.8mm from left
+  const contentW = pageWidth * CONTENT_FRACTION; // 178.2mm wide
+  pdf.addImage(imgData, "PNG", contentX, 0, contentW, pageHeight);
   pdf.save(filename);
 }
 
@@ -181,7 +197,11 @@ export default function AutorizacaoPage() {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {}
-    setData({ ...initialAuth, authorized: { ...initialAuth.authorized }, owner: { ...initialAuth.owner } });
+    setData({
+      ...initialAuth,
+      authorized: { ...initialAuth.authorized },
+      owner: { ...initialAuth.owner },
+    });
     setStep("form");
   };
 
@@ -198,7 +218,7 @@ export default function AutorizacaoPage() {
   const handleDownloadPdf = async () => {
     setPdfLoading(true);
     try {
-      await downloadPdf(".auth-print-page", "autorizacao.pdf");
+      await downloadPdf(".print-label-half", "autorizacao.pdf");
     } finally {
       setPdfLoading(false);
     }
@@ -238,14 +258,18 @@ export default function AutorizacaoPage() {
                 <FormField label="Nome completo" wide>
                   <input
                     value={data.authorized.name}
-                    onChange={(e) => setNested("authorized")("name", e.target.value)}
+                    onChange={(e) =>
+                      setNested("authorized")("name", e.target.value)
+                    }
                     required
                   />
                 </FormField>
                 <FormField label="RG">
                   <input
                     value={data.authorized.rg}
-                    onChange={(e) => setNested("authorized")("rg", formatRg(e.target.value))}
+                    onChange={(e) =>
+                      setNested("authorized")("rg", formatRg(e.target.value))
+                    }
                     placeholder="00.000.000-0"
                     required
                   />
@@ -253,7 +277,9 @@ export default function AutorizacaoPage() {
                 <FormField label="CPF">
                   <input
                     value={data.authorized.cpf}
-                    onChange={(e) => setNested("authorized")("cpf", formatCpf(e.target.value))}
+                    onChange={(e) =>
+                      setNested("authorized")("cpf", formatCpf(e.target.value))
+                    }
                     placeholder="000.000.000-00"
                     inputMode="numeric"
                     required
@@ -269,7 +295,9 @@ export default function AutorizacaoPage() {
                 <FormField label="Número do objeto" wide>
                   <input
                     value={data.objectNumber}
-                    onChange={(e) => set("objectNumber", e.target.value.toUpperCase())}
+                    onChange={(e) =>
+                      set("objectNumber", e.target.value.toUpperCase())
+                    }
                     placeholder="AA000000000BR"
                     required
                   />
@@ -320,7 +348,9 @@ export default function AutorizacaoPage() {
                 <FormField label="RG">
                   <input
                     value={data.owner.rg}
-                    onChange={(e) => setNested("owner")("rg", formatRg(e.target.value))}
+                    onChange={(e) =>
+                      setNested("owner")("rg", formatRg(e.target.value))
+                    }
                     placeholder="00.000.000-0"
                     required
                   />
@@ -328,7 +358,9 @@ export default function AutorizacaoPage() {
                 <FormField label="CPF">
                   <input
                     value={data.owner.cpf}
-                    onChange={(e) => setNested("owner")("cpf", formatCpf(e.target.value))}
+                    onChange={(e) =>
+                      setNested("owner")("cpf", formatCpf(e.target.value))
+                    }
                     placeholder="000.000.000-00"
                     inputMode="numeric"
                     required
@@ -338,11 +370,19 @@ export default function AutorizacaoPage() {
             </section>
 
             <div className="form-actions">
-              <button type="button" className="danger-button" onClick={handleClear}>
+              <button
+                type="button"
+                className="danger-button"
+                onClick={handleClear}
+              >
                 <Trash2 size={16} />
                 Limpar
               </button>
-              <button className="primary-button" type="submit" disabled={!valid}>
+              <button
+                className="primary-button"
+                type="submit"
+                disabled={!valid}
+              >
                 <Printer size={16} />
                 Ver impressão
               </button>
@@ -357,7 +397,10 @@ export default function AutorizacaoPage() {
       ) : (
         <div className="print-layout">
           <div className="print-toolbar no-print">
-            <button className="secondary-button" onClick={() => setStep("form")}>
+            <button
+              className="secondary-button"
+              onClick={() => setStep("form")}
+            >
               <ArrowLeft size={18} />
               Editar dados
             </button>
@@ -375,7 +418,10 @@ export default function AutorizacaoPage() {
             </button>
           </div>
           <div className="print-page-container">
-            <PrintableAuth data={data} />
+            <div className="print-page">
+              <div className="print-blank-half" />
+              <PrintableAuth data={data} />
+            </div>
           </div>
         </div>
       )}

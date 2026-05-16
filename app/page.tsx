@@ -326,7 +326,7 @@ function PrintableLabel({ data }: { data: LabelData }) {
             <p>{data.sender.neighborhood}</p>
             {(data.sender.cep || data.sender.city || data.sender.state) && (
               <p>
-                {data.sender.cep && <>{data.sender.cep} </>}
+                <b>{data.sender.cep && <>{data.sender.cep} </>}</b>
                 {data.sender.city}
                 {data.sender.state ? `-${data.sender.state}` : ""}
               </p>
