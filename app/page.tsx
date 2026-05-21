@@ -2,9 +2,9 @@
 
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Barcode from "react-barcode";
-import { QRCodeSVG } from "qrcode.react";
 import { ArrowLeft, FileDown, Printer, Trash2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 type Address = {
   name: string;
@@ -21,6 +21,7 @@ type LabelData = {
   recipient: Address;
   sender: Address;
   registroModico: boolean;
+  entregaVizinhoAutorizada: boolean;
 };
 
 const emptyAddress: Address = {
@@ -38,6 +39,7 @@ const initialData: LabelData = {
   recipient: { ...emptyAddress },
   sender: { ...emptyAddress },
   registroModico: false,
+  entregaVizinhoAutorizada: false,
 };
 
 const STORAGE_KEY = "etiqueta-data";
@@ -82,6 +84,7 @@ function loadFromStorage(): LabelData {
       recipient: { ...emptyAddress, ...parsed.recipient },
       sender: { ...emptyAddress, ...parsed.sender },
       registroModico: Boolean(parsed.registroModico),
+      entregaVizinhoAutorizada: Boolean(parsed.entregaVizinhoAutorizada),
     };
   } catch {
     return initialData;
@@ -227,16 +230,9 @@ function RegistroModicoStamp() {
 
 function PrintableLabel({ data }: { data: LabelData }) {
   const cepValue = cepDigits(data.recipient.cep) || "00000000";
-  const qrValue = [
-    data.recipient.name,
-    `${data.recipient.street}, ${data.recipient.number}`,
-    data.recipient.complement,
-    data.recipient.neighborhood,
-    `${data.recipient.city}-${data.recipient.state}`,
-    `CEP: ${data.recipient.cep}`,
-  ]
-    .filter(Boolean)
-    .join("\n");
+  const entregaVizinhoText = data.entregaVizinhoAutorizada
+    ? "Entrega no vizinho autorizada"
+    : "Entrega no vizinho não autorizada";
 
   return (
     <div className="print-page">
@@ -271,9 +267,27 @@ function PrintableLabel({ data }: { data: LabelData }) {
             </div>
           </div>
 
+          <div className="neighbor-delivery-box">
+            <div className="neighbor-delivery-header">
+              ENTREGA NO VIZINHO AUTORIZADA?
+            </div>
+            <div className="neighbor-delivery-answer">{entregaVizinhoText}</div>
+          </div>
+
           <div className="main-label">
-            <div className="label-body">
+            <div className="destinatario-row">
               <div className="destinatario-header">DESTINATÁRIO</div>
+              <div className="correios-mark">
+                <Image
+                  className="correios-logo"
+                  src="/correios.svg"
+                  width={100}
+                  height={20}
+                  alt={""}
+                />
+              </div>
+            </div>
+            <div className="label-body">
               <div className="recipient-details">
                 <div className="recipient-name">
                   {data.recipient.name.toUpperCase()}
@@ -303,33 +317,32 @@ function PrintableLabel({ data }: { data: LabelData }) {
                   margin={0}
                 />
               </div>
-            </div>
-            <div className="label-side">
-              <div className="qr-wrap">
-                <QRCodeSVG value={qrValue || "sem dados"} size={110} />
-              </div>
-              {data.registroModico && (
-                <div className="stamp-wrap">
-                  <RegistroModicoStamp />
-                </div>
-              )}
+              <div className="observation-label">Observação:</div>
             </div>
           </div>
 
-          <div className="sender-info">
-            <p>
-              <strong>Remetente:</strong>
-              {data.sender.name}
-            </p>
-            <p>{lineOne(data.sender)}</p>
-            {data.sender.complement && <p>{data.sender.complement}</p>}
-            <p>{data.sender.neighborhood}</p>
-            {(data.sender.cep || data.sender.city || data.sender.state) && (
+          <div className="label-footer">
+            <div className="sender-info">
               <p>
-                <b>{data.sender.cep && <>{data.sender.cep} </>}</b>
-                {data.sender.city}
-                {data.sender.state ? `-${data.sender.state}` : ""}
+                <strong>Remetente:</strong>
+                {data.sender.name}
               </p>
+              <p>{lineOne(data.sender)}</p>
+              {data.sender.complement && <p>{data.sender.complement}</p>}
+              <p>{data.sender.neighborhood}</p>
+              {(data.sender.cep || data.sender.city || data.sender.state) && (
+                <p>
+                  <b>{data.sender.cep && <>{data.sender.cep} </>}</b>
+                  {data.sender.city}
+                  {data.sender.state ? `-${data.sender.state}` : ""}
+                </p>
+              )}
+            </div>
+
+            {data.registroModico && (
+              <div className="stamp-wrap">
+                <RegistroModicoStamp />
+              </div>
             )}
           </div>
         </div>
@@ -342,7 +355,10 @@ async function printPage(selector: string) {
   const win = window.open("", "_blank");
   if (!win) return;
   const element = document.querySelector(selector) as HTMLElement | null;
-  if (!element) { win.close(); return; }
+  if (!element) {
+    win.close();
+    return;
+  }
   const html2canvas = (await import("html2canvas")).default;
   const canvas = await html2canvas(element, {
     scale: 2,
@@ -353,13 +369,13 @@ async function printPage(selector: string) {
   const imgData = canvas.toDataURL("image/png");
   win.document.write(
     `<!DOCTYPE html><html><head><style>` +
-    `@page{size:A4 landscape;margin:0}` +
-    `*{margin:0;padding:0}` +
-    `img{width:100%;height:auto;display:block}` +
-    `</style></head><body>` +
-    `<img src="${imgData}">` +
-    `<script>window.onload=function(){window.print();window.close()}<\/script>` +
-    `</body></html>`,
+      `@page{size:A4 landscape;margin:0}` +
+      `*{margin:0;padding:0}` +
+      `img{width:100%;height:auto;display:block}` +
+      `</style></head><body>` +
+      `<img src="${imgData}">` +
+      `<script>window.onload=function(){window.print();window.close()}<\/script>` +
+      `</body></html>`,
   );
   win.document.close();
 }
@@ -452,6 +468,7 @@ export default function Home() {
       recipient: { ...emptyAddress },
       sender: { ...emptyAddress },
       registroModico: false,
+      entregaVizinhoAutorizada: false,
     });
     setStep("form");
   };
@@ -465,6 +482,13 @@ export default function Home() {
     setData((current) => ({
       ...current,
       registroModico: event.target.checked,
+    }));
+  };
+
+  const toggleEntregaVizinho = (event: ChangeEvent<HTMLInputElement>) => {
+    setData((current) => ({
+      ...current,
+      entregaVizinhoAutorizada: event.target.checked,
     }));
   };
 
@@ -575,6 +599,14 @@ export default function Home() {
               />
               <span>Adicionar selo de Registro Módico</span>
             </label>
+            <label className="checkbox-row">
+              <input
+                type="checkbox"
+                checked={data.entregaVizinhoAutorizada}
+                onChange={toggleEntregaVizinho}
+              />
+              <span>Entrega no vizinho autorizada</span>
+            </label>
             <div className="form-actions">
               <button
                 type="button"
@@ -597,6 +629,14 @@ export default function Home() {
 
           <aside className="preview-panel">
             <div className="sheet-preview">
+              <div className="label-card neighbor-card">
+                <h3>ENTREGA NO VIZINHO AUTORIZADA?</h3>
+                <span>
+                  {data.entregaVizinhoAutorizada
+                    ? "Entrega no vizinho autorizada"
+                    : "Entrega no vizinho não autorizada"}
+                </span>
+              </div>
               <div className="label-card recipient-card">
                 <h3>DESTINATÁRIO</h3>
                 <strong>{data.recipient.name}</strong>

@@ -165,6 +165,10 @@ select {
   margin: 22px 0 18px;
 }
 
+.checkbox-row + .checkbox-row {
+  margin-top: -6px;
+}
+
 .checkbox-row input {
   width: 18px;
   height: 18px;
@@ -238,6 +242,9 @@ select {
   position: relative;
   min-height: 400px;
   background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .label-card {
@@ -259,8 +266,11 @@ select {
   font-size: 16px;
 }
 
+.neighbor-card {
+  font-size: 14px;
+}
+
 .sender-card {
-  margin-top: 12px;
   font-size: 11px;
 }
 
@@ -278,7 +288,6 @@ select {
   text-align: center;
   padding: 16px;
   border: 1px solid #111;
-  margin-top: 16px;
 }
 
 .registro-stamp > div {
@@ -319,8 +328,6 @@ select {
   display: flex;
   justify-content: center;
 }
-
-/* ── Printable label (Correios style — landscape, label on right) ── */
 
 .print-page {
   display: flex;
@@ -432,30 +439,74 @@ select {
 
 .main-label {
   display: flex;
+  flex-direction: column;
   border: 1.5px solid #000;
   min-height: 220px;
 }
 
 .label-body {
+  position: relative;
   flex: 1;
-  border-right: 1.5px solid #000;
   display: flex;
   flex-direction: column;
+}
+
+.neighbor-delivery-box {
+  border: 1.5px solid #000;
+  margin-bottom: 3px;
+}
+
+.neighbor-delivery-header {
+  display: inline-block;
+  padding: 4px 10px 1px;
+  background: #000;
+  color: #fff;
+  font-size: 11px;
+  font-weight: bold;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.neighbor-delivery-answer {
+  padding: 2px 10px 4px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.destinatario-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 25px;
 }
 
 .destinatario-header {
   background: #000;
   color: #fff;
   font-weight: bold;
+  font-size: 13px;
+  padding: 2px 26px 1px;
+  line-height: 1.2;
+  letter-spacing: 0;
+}
+
+.correios-mark {
+  margin: 4px 10px 0 0;
   font-size: 12px;
-  padding: 5px 12px;
-  letter-spacing: 0.5px;
+  font-weight: bold;
+  font-style: italic;
+  height: 14px;
+
+  .correios-logo {
+    height: 100%;
+    width: auto;
+  }
 }
 
 .recipient-details {
-  padding: 10px 12px 6px;
+  padding: 0 10px 2px;
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.32;
   display: flex;
   flex-direction: column;
   gap: 1px;
@@ -467,25 +518,26 @@ select {
 }
 
 .cep-city-line {
-  padding: 8px 12px 4px;
-  font-size: 20px;
+  padding: 0 10px 1px;
+  font-size: 12px;
   font-weight: bold;
   display: flex;
   align-items: baseline;
-  gap: 10px;
+  gap: 44px;
   flex-wrap: wrap;
 }
 
 .cep-large {
-  font-size: 20px;
+  font-size: 12px;
 }
 
 .city-large {
-  font-size: 16px;
+  font-size: 12px;
 }
 
 .barcode-wrap {
-  padding: 4px 12px 10px;
+  width: 265px;
+  padding: 2px 0 3px 22px;
 }
 
 .barcode-wrap svg {
@@ -494,19 +546,12 @@ select {
   display: block;
 }
 
-.label-side {
-  width: 155px;
-  flex-shrink: 0;
-  padding: 12px 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.qr-wrap {
-  display: flex;
-  justify-content: center;
+.observation-label {
+  position: absolute;
+  right: 12%;
+  top: 90px;
+  font-size: 11px;
+  font-weight: bold;
 }
 
 .stamp-wrap .registro-stamp {
@@ -527,8 +572,13 @@ select {
   font-size: 11px;
 }
 
-.sender-info {
+.label-footer {
+  display: flex;
+  justify-content: space-between;
   margin-top: 10px;
+}
+
+.sender-info {
   font-size: 12px;
   line-height: 1.5;
 }
